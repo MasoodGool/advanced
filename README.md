@@ -20,11 +20,15 @@ It is built using express JS so that it can be easily changed into a web API to 
    ```sh
    git clone https://github.com/MasoodGool/advanced.git
    ```
-2. Install NPM packages
+2. Open repo
+   ```sh
+   cd advanced
+   ```
+3. Install NPM packages
    ```sh
    npm install
    ```
-3. Run Application
+4. Run Application
    ```sh
    npm start
    ```
