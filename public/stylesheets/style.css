@@ -1,8 +1,287 @@
+/* ── Reset & base ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #f0f2f5;
+  color: #1c1e21;
+  min-height: 100vh;
 }
 
-a {
-  color: #00B7FF;
+/* ── Header ──────────────────────────────────────────────────────────────────*/
+.header {
+  background: #1877f2;
+  color: #fff;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.3px; }
+.header .subtitle { font-size: 0.78rem; opacity: 0.85; margin-top: 2px; }
+
+/* ── Main layout ─────────────────────────────────────────────────────────────*/
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr 1fr;
+  gap: 20px;
+  max-width: 1100px;
+  margin: 28px auto;
+  padding: 0 20px;
+  align-items: start;
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────────*/
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1), 0 4px 16px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid #e4e6ea;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.card-header h2 { font-size: 1rem; font-weight: 700; }
+
+.card-body { padding: 18px 20px; }
+
+/* ── Avatar ──────────────────────────────────────────────────────────────────*/
+.avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.avatar.buyer  { background: #e7f3ff; color: #1877f2; }
+.avatar.seller { background: #e6f4ea; color: #1a8917; }
+.avatar.escrow { background: #fff3e0; color: #e65100; }
+
+/* ── Balance ─────────────────────────────────────────────────────────────────*/
+.balance-block { text-align: center; margin-bottom: 18px; }
+.balance-label { font-size: 0.75rem; color: #65676b; text-transform: uppercase; letter-spacing: 0.06em; }
+.balance-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1c1e21;
+  line-height: 1.2;
+}
+.balance-amount.updated { color: #1a8917; animation: flash 0.6s ease; }
+@keyframes flash { 0%,100%{ opacity:1 } 40%{ opacity:0.3 } }
+
+/* ── Listing card (inside buyer panel) ───────────────────────────────────────*/
+.listing {
+  border: 1px solid #e4e6ea;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.listing-img {
+  background: linear-gradient(135deg, #e3f0ff 0%, #cce5ff 100%);
+  height: 110px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem;
+}
+.listing-info { padding: 12px 14px; }
+.listing-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+.listing-desc  { font-size: 0.8rem; color: #65676b; margin-bottom: 10px; line-height: 1.4; }
+.listing-price { font-size: 1.25rem; font-weight: 800; color: #1877f2; }
+.listing-status-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-left: 8px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.listing-status-tag.available { background: #e6f4ea; color: #1a8917; }
+.listing-status-tag.in_escrow { background: #fff3e0; color: #e65100; }
+.listing-status-tag.sold      { background: #f0f0f0; color: #65676b; }
+
+/* ── Buttons ─────────────────────────────────────────────────────────────────*/
+.btn {
+  display: block;
+  width: 100%;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+  margin-top: 10px;
+}
+.btn:hover:not(:disabled)  { filter: brightness(0.93); }
+.btn:active:not(:disabled) { transform: scale(0.98); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-primary   { background: #1877f2; color: #fff; }
+.btn-success   { background: #42b883; color: #fff; }
+.btn-warning   { background: #ff9800; color: #fff; }
+.btn-danger    { background: #e53935; color: #fff; }
+.btn-secondary { background: #e4e6ea; color: #1c1e21; }
+
+/* ── Status badge ────────────────────────────────────────────────────────────*/
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.status-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+.status-none      { background: #f0f2f5; color: #65676b; }
+.status-none::before { background: #bcc0c4; }
+
+.status-pending   { background: #fff8e1; color: #f57f17; }
+.status-pending::before { background: #fbc02d; animation: pulse 1.4s infinite; }
+
+.status-shipped   { background: #e3f2fd; color: #1565c0; }
+.status-shipped::before { background: #1e88e5; }
+
+.status-confirmed { background: #e8f5e9; color: #1b5e20; }
+.status-confirmed::before { background: #43a047; }
+
+.status-disputed  { background: #fbe9e7; color: #bf360c; }
+.status-disputed::before { background: #e64a19; }
+
+.status-cancelled { background: #f5f5f5; color: #757575; }
+.status-cancelled::before { background: #9e9e9e; }
+
+@keyframes pulse { 0%,100%{ opacity:1 } 50%{ opacity:0.4 } }
+
+/* ── Escrow center panel ─────────────────────────────────────────────────────*/
+.escrow-meta { margin-bottom: 16px; }
+.escrow-meta-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: #65676b;
+  padding: 5px 0;
+  border-bottom: 1px solid #f0f2f5;
+}
+.escrow-meta-row:last-child { border-bottom: none; }
+.escrow-meta-row strong { color: #1c1e21; }
+
+.amount-highlight {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #e65100;
+  text-align: center;
+  padding: 10px 0;
+}
+
+/* ── Timeline ────────────────────────────────────────────────────────────────*/
+.timeline { margin-top: 16px; }
+.timeline-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #65676b;
+  margin-bottom: 10px;
+}
+.timeline-empty { color: #bcc0c4; font-size: 0.85rem; text-align: center; padding: 20px 0; }
+
+.tl-item {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  align-items: flex-start;
+}
+.tl-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #1877f2;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.tl-text { font-size: 0.82rem; line-height: 1.4; }
+.tl-time { font-size: 0.72rem; color: #bcc0c4; margin-top: 2px; }
+
+/* ── Actions section ─────────────────────────────────────────────────────────*/
+.actions-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #65676b;
+  margin-bottom: 6px;
+}
+
+/* ── Terminal state message ──────────────────────────────────────────────────*/
+.terminal-msg {
+  text-align: center;
+  padding: 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+.terminal-msg.confirmed { background: #e8f5e9; color: #1b5e20; }
+.terminal-msg.disputed  { background: #fbe9e7; color: #bf360c; }
+.terminal-msg.cancelled { background: #f5f5f5; color: #757575; }
+
+/* ── Empty escrow state ──────────────────────────────────────────────────────*/
+.no-escrow {
+  text-align: center;
+  padding: 32px 20px;
+  color: #bcc0c4;
+}
+.no-escrow .icon { font-size: 2.5rem; margin-bottom: 10px; }
+.no-escrow p { font-size: 0.88rem; }
+
+/* ── Reset button (header) ───────────────────────────────────────────────────*/
+.btn-reset {
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.55);
+  color: #fff;
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-reset:hover { background: rgba(255,255,255,0.28); }
+
+/* ── Error toast ─────────────────────────────────────────────────────────────*/
+.toast {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #c62828;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  transition: transform 0.3s ease;
+  z-index: 999;
+  max-width: 420px;
+  text-align: center;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── Responsive ──────────────────────────────────────────────────────────────*/
+@media (max-width: 780px) {
+  .layout { grid-template-columns: 1fr; }
 }

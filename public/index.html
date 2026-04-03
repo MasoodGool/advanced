@@ -1,13 +1,307 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <title>Express</title>
-  <link rel="stylesheet" href="/stylesheets/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marketplace Escrow — POC</title>
+  <link rel="stylesheet" href="/stylesheets/style.css" />
 </head>
-
 <body>
-  <h1>Express</h1>
-  <p>Welcome to Express</p>
-</body>
 
+<!-- Header -->
+<header class="header">
+  <div>
+    <h1>🔒 Marketplace Escrow</h1>
+    <div class="subtitle">Proof of Concept — Funds held until both parties confirm</div>
+  </div>
+  <button class="btn-reset" id="btnReset">↺ Reset Demo</button>
+</header>
+
+<!-- 3-column layout -->
+<main class="layout">
+
+  <!-- ── LEFT: Buyer (Alice) ─────────────────────────────────────────── -->
+  <section class="card" id="buyerPanel">
+    <div class="card-header">
+      <div class="avatar buyer">A</div>
+      <div>
+        <h2>Alice</h2>
+        <div style="font-size:0.75rem;color:#65676b">Buyer</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="balance-block">
+        <div class="balance-label">Wallet Balance</div>
+        <div class="balance-amount" id="buyerBalance">$1,000</div>
+      </div>
+
+      <!-- Listing -->
+      <div class="listing" id="listingCard">
+        <div class="listing-img">🚲</div>
+        <div class="listing-info">
+          <div class="listing-title" id="listingTitle">Vintage Road Bike</div>
+          <div class="listing-desc" id="listingDesc">1987 Peugeot, fully restored and serviced. Rides like new.</div>
+          <div>
+            <span class="listing-price" id="listingPrice">$350</span>
+            <span class="listing-status-tag available" id="listingStatusTag">Available</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buyer actions -->
+      <div id="buyerActions" style="margin-top:12px"></div>
+    </div>
+  </section>
+
+  <!-- ── CENTER: Escrow Status ───────────────────────────────────────── -->
+  <section class="card" id="escrowPanel">
+    <div class="card-header">
+      <div class="avatar escrow">$</div>
+      <div>
+        <h2>Escrow</h2>
+        <div style="font-size:0.75rem;color:#65676b">Neutral holding account</div>
+      </div>
+    </div>
+    <div class="card-body" id="escrowBody">
+      <div class="no-escrow">
+        <div class="icon">🔐</div>
+        <p>No active escrow.<br>Alice can start a purchase below.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── RIGHT: Seller (Bob) ────────────────────────────────────────── -->
+  <section class="card" id="sellerPanel">
+    <div class="card-header">
+      <div class="avatar seller">B</div>
+      <div>
+        <h2>Bob</h2>
+        <div style="font-size:0.75rem;color:#65676b">Seller</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="balance-block">
+        <div class="balance-label">Wallet Balance</div>
+        <div class="balance-amount" id="sellerBalance">$200</div>
+      </div>
+      <div id="sellerActions"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Error toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let state = { users: {}, listings: {}, escrows: {} };
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+const fmt = n => '$' + Number(n).toLocaleString();
+const el  = id => document.getElementById(id);
+
+function showToast(msg) {
+  const t = el('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch('/api' + path, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+// ── Fetch & render ─────────────────────────────────────────────────────────
+async function fetchState() {
+  state = await api('GET', '/state');
+  render();
+}
+
+function render() {
+  const buyer  = state.users.buyer;
+  const seller = state.users.seller;
+  const listing = Object.values(state.listings)[0];
+  const escrow  = Object.values(state.escrows)[0] || null;
+
+  // Balances
+  el('buyerBalance').textContent  = fmt(buyer.balance);
+  el('sellerBalance').textContent = fmt(seller.balance);
+
+  // Listing tag
+  const tagEl = el('listingStatusTag');
+  tagEl.textContent = { available: 'Available', in_escrow: 'In Escrow', sold: 'Sold' }[listing.status] || listing.status;
+  tagEl.className = 'listing-status-tag ' + listing.status;
+
+  // Buyer actions
+  renderBuyerActions(escrow, listing);
+
+  // Seller actions
+  renderSellerActions(escrow);
+
+  // Escrow center panel
+  renderEscrowPanel(escrow, listing);
+}
+
+function renderBuyerActions(escrow, listing) {
+  const div = el('buyerActions');
+  div.innerHTML = '';
+
+  if (!escrow && listing.status === 'available') {
+    const btn = makeBtn('Buy Now — ' + fmt(listing.price), 'btn-primary', async () => {
+      await api('POST', '/escrow', { listingId: listing.id, buyerId: 'buyer' });
+      await fetchState();
+    });
+    div.appendChild(btn);
+  }
+
+  if (escrow && escrow.status === 'pending') {
+    div.appendChild(makeBtn('Cancel Purchase (Refund)', 'btn-secondary', async () => {
+      await api('POST', `/escrow/${escrow.id}/cancel`, { userId: 'buyer' });
+      await fetchState();
+    }));
+  }
+
+  if (escrow && escrow.status === 'shipped') {
+    div.appendChild(makeBtn('✓ Confirm Receipt', 'btn-success', async () => {
+      await api('POST', `/escrow/${escrow.id}/confirm`, { userId: 'buyer' });
+      await fetchState();
+    }));
+    div.appendChild(makeBtn('⚠ Raise Dispute', 'btn-danger', async () => {
+      await api('POST', `/escrow/${escrow.id}/dispute`, { userId: 'buyer', reason: 'Item not as described' });
+      await fetchState();
+    }));
+  }
+}
+
+function renderSellerActions(escrow) {
+  const div = el('sellerActions');
+  div.innerHTML = '';
+
+  if (!escrow) {
+    div.innerHTML = '<div style="color:#bcc0c4;font-size:0.85rem;text-align:center;padding:20px 0">Waiting for a buyer…</div>';
+    return;
+  }
+
+  if (escrow.status === 'pending') {
+    div.appendChild(labelEl('New order received!'));
+    div.appendChild(makeBtn('📦 Mark as Shipped', 'btn-primary', async () => {
+      await api('POST', `/escrow/${escrow.id}/ship`, { userId: 'seller' });
+      await fetchState();
+    }));
+    div.appendChild(makeBtn('⚠ Raise Dispute', 'btn-danger', async () => {
+      await api('POST', `/escrow/${escrow.id}/dispute`, { userId: 'seller', reason: 'Cannot fulfil order' });
+      await fetchState();
+    }));
+  }
+
+  if (escrow.status === 'shipped') {
+    div.appendChild(labelEl('Waiting for buyer to confirm…'));
+    div.appendChild(makeBtn('⚠ Raise Dispute', 'btn-danger', async () => {
+      await api('POST', `/escrow/${escrow.id}/dispute`, { userId: 'seller', reason: 'Buyer unresponsive' });
+      await fetchState();
+    }));
+  }
+
+  const terminals = {
+    confirmed: '<div class="terminal-msg confirmed">🎉 Payment released to you!</div>',
+    disputed:  '<div class="terminal-msg disputed">⚠ Dispute filed — awaiting resolution</div>',
+    cancelled: '<div class="terminal-msg cancelled">Purchase was cancelled. Listing is available again.</div>',
+  };
+  if (terminals[escrow.status]) div.innerHTML = terminals[escrow.status];
+}
+
+function renderEscrowPanel(escrow, listing) {
+  const body = el('escrowBody');
+
+  if (!escrow) {
+    body.innerHTML = `
+      <div class="no-escrow">
+        <div class="icon">🔐</div>
+        <p>No active escrow.<br>Alice can start a purchase below.</p>
+      </div>`;
+    return;
+  }
+
+  const statusLabel = {
+    pending:   'Pending',
+    shipped:   'Shipped',
+    confirmed: 'Confirmed',
+    disputed:  'Disputed',
+    cancelled: 'Cancelled',
+  }[escrow.status] || escrow.status;
+
+  const timeline = escrow.timeline.map(t => `
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div>
+        <div class="tl-text">${t.event}</div>
+        <div class="tl-time">${new Date(t.ts).toLocaleTimeString()}</div>
+      </div>
+    </div>`).join('');
+
+  body.innerHTML = `
+    <div style="text-align:center;margin-bottom:16px">
+      <span class="status-badge status-${escrow.status}">${statusLabel}</span>
+    </div>
+    <div class="amount-highlight">${fmt(escrow.amount)} held</div>
+    <div class="escrow-meta">
+      <div class="escrow-meta-row">
+        <span>Listing</span>
+        <strong>${listing.title}</strong>
+      </div>
+      <div class="escrow-meta-row">
+        <span>Buyer</span>
+        <strong>Alice</strong>
+      </div>
+      <div class="escrow-meta-row">
+        <span>Seller</span>
+        <strong>Bob</strong>
+      </div>
+      <div class="escrow-meta-row">
+        <span>Created</span>
+        <strong>${new Date(escrow.createdAt).toLocaleTimeString()}</strong>
+      </div>
+    </div>
+    <div class="timeline">
+      <div class="timeline-title">Activity</div>
+      ${timeline || '<div class="timeline-empty">No events yet</div>'}
+    </div>`;
+}
+
+// ── DOM helpers ────────────────────────────────────────────────────────────
+function makeBtn(text, cls, onClick) {
+  const b = document.createElement('button');
+  b.className = 'btn ' + cls;
+  b.textContent = text;
+  b.addEventListener('click', async () => {
+    b.disabled = true;
+    try { await onClick(); }
+    catch (e) { showToast(e.message); b.disabled = false; }
+  });
+  return b;
+}
+
+function labelEl(text) {
+  const d = document.createElement('div');
+  d.className = 'actions-title';
+  d.textContent = text;
+  return d;
+}
+
+// ── Reset ──────────────────────────────────────────────────────────────────
+el('btnReset').addEventListener('click', async () => {
+  await api('POST', '/reset');
+  await fetchState();
+});
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+fetchState();
+</script>
+</body>
 </html>
