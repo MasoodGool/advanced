@@ -1,17 +1,17 @@
 // In-memory store — module-level singleton (Node caches modules, so this persists per process)
 
 const seedUsers = () => ({
-  buyer:  { id: 'buyer',  name: 'Alice (Buyer)',  balance: 1000 },
-  seller: { id: 'seller', name: 'Bob (Seller)',    balance: 200  },
+  buyer:  { id: 'buyer',  name: 'Amara',  balance: 12000 },
+  seller: { id: 'seller', name: 'Sipho',  balance: 3500  },
 });
 
 const seedListings = () => ({
   'listing-1': {
     id:          'listing-1',
     sellerId:    'seller',
-    title:       'Vintage Road Bike',
-    description: '1987 Peugeot, fully restored and serviced. Rides like new.',
-    price:       350,
+    title:       'Sony PlayStation 5 (Disc Edition)',
+    description: 'Excellent condition, barely used. Includes 2 controllers and 3 games. Selling due to upgrade.',
+    price:       8500,
     status:      'available', // 'available' | 'in_escrow' | 'sold'
   },
 });
