@@ -18,7 +18,7 @@ console.log(`Which consists of: ${hand.descr}`);
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(express.json());
 // __dirname resolves to dist-server/ at runtime; public/ is two levels up
-app.use(express.static(path.join(__dirname, '../../public')));
+app.use(express.static(path.join(__dirname, '../public')));
 
 // ── Escrow API ────────────────────────────────────────────────────────────────
 app.use('/api', escrowRouter);
