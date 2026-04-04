@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PayVault — Escrow Demo</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/stylesheets/style.css" />
+  <link rel="stylesheet" href="/stylesheets/style.css"/>
 </head>
 <body>
+
+<!-- Confetti canvas -->
+<canvas id="confetti-canvas"></canvas>
 
 <!-- ── Navbar ──────────────────────────────────────────────────────────────── -->
 <nav class="navbar">
@@ -28,10 +31,42 @@
   </div>
 </nav>
 
-<!-- ── 3-column layout ─────────────────────────────────────────────────────── -->
+<!-- ── Stats strip (#1 + #9) ───────────────────────────────────────────────── -->
+<div class="stats-strip">
+  <div class="stat-card">
+    <div class="stat-icon fees">💰</div>
+    <div>
+      <div class="stat-value" id="statFees">R 0</div>
+      <div class="stat-label">PayVault Fees Earned</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon deals">✅</div>
+    <div>
+      <div class="stat-value" id="statDeals">0</div>
+      <div class="stat-label">Deals Completed</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon volume">📊</div>
+    <div>
+      <div class="stat-value" id="statVolume">R 0</div>
+      <div class="stat-label">Total Volume Processed</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon disputes">⚖️</div>
+    <div>
+      <div class="stat-value" id="statDisputes">0</div>
+      <div class="stat-label">Disputes Resolved by AI</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main layout ─────────────────────────────────────────────────────────── -->
 <main class="layout">
 
-  <!-- LEFT: Buyer (Amara) -->
+  <!-- LEFT: Buyer -->
   <div>
     <div class="card">
       <div class="card-body">
@@ -39,7 +74,7 @@
           <div class="wallet-role">Buyer</div>
           <div class="wallet-name">Amara</div>
           <div class="wallet-balance-label">Available balance</div>
-          <div class="wallet-balance" id="buyerBalance">R 12,000</div>
+          <div class="wallet-balance" id="buyerBalance">R 25,000</div>
         </div>
       </div>
     </div>
@@ -47,53 +82,61 @@
     <div class="card">
       <div class="card-body">
         <div class="card-header-row">
-          <span class="card-title">Marketplace Listing</span>
+          <span class="card-title">Marketplace (#5 Multiple Listings)</span>
         </div>
-
-        <div class="listing">
-          <div class="listing-img">🎮</div>
-          <div class="listing-info">
-            <div class="listing-title" id="listingTitle">Sony PlayStation 5</div>
-            <div class="listing-desc">Excellent condition, barely used. 2 controllers &amp; 3 games. Selling due to upgrade.</div>
-            <div class="listing-bottom">
-              <span class="listing-price" id="listingPrice">R 8,500</span>
-              <span class="listing-status-tag available" id="listingStatusTag">Available</span>
-            </div>
-          </div>
-        </div>
-
-        <div id="buyerActions"></div>
+        <!-- Listing grid filled by JS -->
+        <div class="listing-grid" id="listingGrid"></div>
+        <div id="buyerActions" style="margin-top:10px"></div>
       </div>
     </div>
   </div>
 
-  <!-- CENTRE: Escrow Status -->
+  <!-- CENTRE: Escrow -->
   <div>
     <div class="card">
       <div class="card-body">
         <div class="card-header-row">
           <span class="card-title">Escrow Status</span>
-          <span id="statusBadge" class="status-badge status-none">No escrow</span>
+          <span class="status-badge status-none" id="statusBadge">No escrow</span>
+        </div>
+
+        <!-- Step progress (#1) -->
+        <div class="stepper" id="stepper" style="display:none">
+          <div class="step" id="step1">
+            <div class="step-circle">1</div>
+            <div class="step-label">Created</div>
+          </div>
+          <div class="step-line" id="line1"></div>
+          <div class="step" id="step2">
+            <div class="step-circle">2</div>
+            <div class="step-label">Shipped</div>
+          </div>
+          <div class="step-line" id="line2"></div>
+          <div class="step" id="step3">
+            <div class="step-circle">3</div>
+            <div class="step-label">Confirmed</div>
+          </div>
         </div>
 
         <div id="escrowBody">
           <div class="no-escrow">
             <div class="icon">🔐</div>
-            <p>No active escrow.<br>Amara can start a protected purchase from the left panel.</p>
+            <p>Select a listing on the left and click <strong>Buy Now</strong> to start a protected escrow transaction.</p>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Timeline card (#4 animated) -->
     <div class="card" id="timelineCard" style="display:none">
       <div class="card-body">
-        <div class="timeline-head">Activity</div>
+        <div class="timeline-head">Activity Log</div>
         <div id="timeline"></div>
       </div>
     </div>
   </div>
 
-  <!-- RIGHT: Seller (Sipho) -->
+  <!-- RIGHT: Seller -->
   <div>
     <div class="card">
       <div class="card-body">
@@ -112,7 +155,7 @@
           <span class="card-title">Seller Actions</span>
         </div>
         <div id="sellerActions">
-          <div class="waiting-msg">Waiting for a buyer to initiate an escrow deal…</div>
+          <div class="waiting-msg">Waiting for a buyer to initiate a deal…</div>
         </div>
       </div>
     </div>
@@ -122,16 +165,19 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- canvas-confetti (#8) -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 <script>
-// ── Helpers ────────────────────────────────────────────────────────────────
+// ── Globals ────────────────────────────────────────────────────────────────
 const el  = id => document.getElementById(id);
 const fmt = n  => 'R\u00A0' + Number(n).toLocaleString('en-ZA');
 
-const tl_icons = {
-  buyer:  '🛒',
-  seller: '📦',
-};
+let countdownInterval = null;
+let selectedListingId = null;
+let prevStats = { feesEarned: 0, dealsCompleted: 0, totalVolume: 0, disputesResolved: 0 };
+let disputeRevealTimeout = null;
 
+// ── Helpers ────────────────────────────────────────────────────────────────
 function showToast(msg) {
   const t = el('toast');
   t.textContent = msg;
@@ -148,57 +194,122 @@ async function api(method, path, body) {
   return data;
 }
 
-// ── State ──────────────────────────────────────────────────────────────────
+// ── Fetch & render ─────────────────────────────────────────────────────────
 async function fetchState() {
   const state = await api('GET', '/state');
   render(state);
 }
 
-// ── Render ─────────────────────────────────────────────────────────────────
 function render(state) {
-  const buyer   = state.users.buyer;
-  const seller  = state.users.seller;
-  const listing = Object.values(state.listings)[0];
-  const escrow  = Object.values(state.escrows)[0] || null;
+  const { users, listings, escrows, stats } = state;
+  const buyer  = users.buyer;
+  const seller = users.seller;
+  const escrow = Object.values(escrows)[0] || null;
 
+  // Balances
   el('buyerBalance').textContent  = fmt(buyer.balance);
   el('sellerBalance').textContent = fmt(seller.balance);
-  el('listingPrice').textContent  = fmt(listing.price);
 
-  const tagLabels = { available: 'Available', in_escrow: 'In Escrow', sold: 'Sold' };
-  const tagEl = el('listingStatusTag');
-  tagEl.textContent = tagLabels[listing.status] || listing.status;
-  tagEl.className = 'listing-status-tag ' + listing.status;
+  // Stats strip (#2 + #9 fee ticker)
+  renderStats(stats);
 
-  renderBuyerActions(escrow, listing);
+  // Marketplace grid (#5)
+  renderListingGrid(listings, escrow);
+
+  // Buyer actions
+  renderBuyerActions(escrow, listings);
+
+  // Seller actions
   renderSellerActions(escrow);
-  renderEscrowPanel(escrow, listing);
+
+  // Escrow panel
+  renderEscrowPanel(escrow, listings);
 }
 
-// ── Buyer ──────────────────────────────────────────────────────────────────
-function renderBuyerActions(escrow, listing) {
+// ── Stats ──────────────────────────────────────────────────────────────────
+function renderStats(stats) {
+  function update(id, val, prefix) {
+    const e = el(id);
+    const text = prefix ? fmt(val) : String(val);
+    if (e.textContent !== text) {
+      e.textContent = text;
+      e.classList.remove('tick');
+      void e.offsetWidth;
+      e.classList.add('tick');
+    }
+  }
+  update('statFees',      stats.feesEarned,       true);
+  update('statDeals',     stats.dealsCompleted,    false);
+  update('statVolume',    stats.totalVolume,        true);
+  update('statDisputes',  stats.disputesResolved,  false);
+  prevStats = { ...stats };
+}
+
+// ── Listing grid (#5) ──────────────────────────────────────────────────────
+function renderListingGrid(listings, escrow) {
+  const grid = el('listingGrid');
+  grid.innerHTML = '';
+  const activeEscrowListingId = escrow?.listingId;
+
+  Object.values(listings).forEach(listing => {
+    const unavailable = listing.status !== 'available';
+    const isSelected  = listing.id === selectedListingId && !unavailable;
+
+    const div = document.createElement('div');
+    div.className = 'listing' + (isSelected ? ' selected' : '') + (unavailable ? ' unavailable' : '');
+    div.innerHTML = `
+      <div class="listing-img">${listing.emoji}</div>
+      <div class="listing-info">
+        <div class="listing-title">${listing.title}</div>
+        <div class="listing-price">${fmt(listing.price)}</div>
+        <span class="listing-status-tag ${listing.status}">${
+          { available: 'Available', in_escrow: 'In Escrow', sold: 'Sold' }[listing.status]
+        }</span>
+      </div>`;
+
+    if (!unavailable) {
+      div.addEventListener('click', () => {
+        selectedListingId = listing.id;
+        renderListingGrid(listings, escrow);
+        renderBuyerActions(escrow, listings);
+      });
+    }
+    grid.appendChild(div);
+  });
+}
+
+// ── Buyer actions ──────────────────────────────────────────────────────────
+function renderBuyerActions(escrow, listings) {
   const div = el('buyerActions');
   div.innerHTML = '';
+  const listing = selectedListingId ? listings[selectedListingId] : null;
 
-  if (!escrow && listing.status === 'available') {
-    div.appendChild(mkBtn(`Buy Now — ${fmt(listing.price)}`, 'btn-primary', async () => {
+  if (!escrow) {
+    if (!listing || listing.status !== 'available') {
+      div.innerHTML = '<div class="waiting-msg" style="padding:8px 0">← Select a listing to buy</div>';
+      return;
+    }
+    div.appendChild(mkBtn(`🔒 Buy Now — ${fmt(listing.price)}`, 'btn-primary', async () => {
       await api('POST', '/escrow', { listingId: listing.id, buyerId: 'buyer' });
       await fetchState();
     }));
+    return;
   }
 
-  if (escrow?.status === 'pending') {
+  if (escrow.status === 'pending') {
     div.appendChild(mkLabel('Funds locked in escrow'));
-    div.appendChild(mkBtn('Cancel — Get Refund', 'btn-secondary', async () => {
+    div.appendChild(mkBtn('Cancel — Full Refund', 'btn-secondary', async () => {
       await api('POST', `/escrow/${escrow.id}/cancel`, { userId: 'buyer' });
+      selectedListingId = null;
       await fetchState();
     }));
   }
 
-  if (escrow?.status === 'shipped') {
+  if (escrow.status === 'shipped') {
     div.appendChild(mkLabel('Item has been shipped'));
     div.appendChild(mkBtn('✓ Confirm Receipt', 'btn-success', async () => {
       await api('POST', `/escrow/${escrow.id}/confirm`, { userId: 'buyer' });
+      launchConfetti();
       await fetchState();
     }));
     div.appendChild(mkBtn('Raise Dispute', 'btn-danger', async () => {
@@ -208,13 +319,13 @@ function renderBuyerActions(escrow, listing) {
   }
 }
 
-// ── Seller ─────────────────────────────────────────────────────────────────
+// ── Seller actions ─────────────────────────────────────────────────────────
 function renderSellerActions(escrow) {
   const div = el('sellerActions');
   div.innerHTML = '';
 
   if (!escrow) {
-    div.innerHTML = '<div class="waiting-msg">Waiting for a buyer to initiate an escrow deal…</div>';
+    div.innerHTML = '<div class="waiting-msg">Waiting for a buyer to initiate a deal…</div>';
     return;
   }
   if (escrow.status === 'pending') {
@@ -230,76 +341,126 @@ function renderSellerActions(escrow) {
     return;
   }
   if (escrow.status === 'shipped') {
-    div.innerHTML = '<div class="waiting-msg">Awaiting buyer confirmation. Funds will release automatically on approval.</div>';
+    div.innerHTML = '<div class="waiting-msg">Awaiting buyer confirmation. Funds release automatically on approval.</div>';
     div.appendChild(mkBtn('Raise Dispute', 'btn-danger', async () => {
       await api('POST', `/escrow/${escrow.id}/dispute`, { userId: 'seller', reason: 'Buyer unresponsive' });
       await fetchState();
     }));
     return;
   }
-  const msgs = {
-    confirmed: `<div class="terminal-msg confirmed">🎉 ${escrow ? fmt(escrow.amount) : ''} released to your wallet!</div>`,
-    disputed:  '<div class="terminal-msg disputed">⚠ Dispute filed. AI review in progress — resolution within 2 hours.</div>',
-    cancelled: '<div class="terminal-msg cancelled">Transaction cancelled. Listing is available again.</div>',
-  };
-  if (msgs[escrow.status]) div.innerHTML = msgs[escrow.status];
+  if (escrow.status === 'confirmed') {
+    div.innerHTML = `<div class="terminal-msg confirmed">🎉 ${fmt(Math.round(escrow.amount * 0.97))} released to your wallet!<br><small style="opacity:.7">PayVault fee: ${fmt(Math.round(escrow.amount * 0.03))}</small></div>`;
+    return;
+  }
+  if (escrow.status === 'disputed') {
+    div.innerHTML = '<div class="waiting-msg">Dispute filed. Awaiting AI resolution…</div>';
+    return;
+  }
+  if (escrow.status === 'cancelled') {
+    div.innerHTML = '<div class="terminal-msg cancelled">Transaction cancelled. Listing is available again.</div>';
+  }
 }
 
-// ── Escrow centre ──────────────────────────────────────────────────────────
-function renderEscrowPanel(escrow, listing) {
-  const body      = el('escrowBody');
-  const badge     = el('statusBadge');
-  const tlCard    = el('timelineCard');
-  const tlDiv     = el('timeline');
+// ── Escrow centre panel ────────────────────────────────────────────────────
+function renderEscrowPanel(escrow, listings) {
+  const body     = el('escrowBody');
+  const badge    = el('statusBadge');
+  const stepper  = el('stepper');
+  const tlCard   = el('timelineCard');
+  const tlDiv    = el('timeline');
 
-  const statusLabels = {
-    pending: 'Pending', shipped: 'Shipped', confirmed: 'Confirmed',
-    disputed: 'Disputed', cancelled: 'Cancelled',
-  };
+  const labels = { pending:'Pending', shipped:'Shipped', confirmed:'Confirmed', disputed:'Disputed', cancelled:'Cancelled' };
 
   if (!escrow) {
     badge.className = 'status-badge status-none';
     badge.textContent = 'No escrow';
+    stepper.style.display = 'none';
     body.innerHTML = `
       <div class="no-escrow">
         <div class="icon">🔐</div>
-        <p>No active escrow.<br>Amara can start a protected purchase from the left panel.</p>
+        <p>Select a listing on the left and click <strong>Buy Now</strong> to start a protected escrow transaction.</p>
       </div>`;
     tlCard.style.display = 'none';
+    stopCountdown();
     return;
   }
 
   badge.className = `status-badge status-${escrow.status}`;
-  badge.textContent = statusLabels[escrow.status] || escrow.status;
+  badge.textContent = labels[escrow.status] || escrow.status;
+
+  // Stepper (#1)
+  stepper.style.display = 'flex';
+  updateStepper(escrow.status);
+
+  const listing = listings[escrow.listingId] || {};
+  const fee     = Math.round(escrow.amount * 0.03);
+
+  // Deal link (#6)
+  const dealUrl = `payvault.co.za/deal/${escrow.id.replace('escrow-', '')}`;
+
+  // Countdown (#3)
+  let countdownHtml = '';
+  if (escrow.status === 'shipped' && escrow.inspectionDeadline) {
+    countdownHtml = `
+      <div class="countdown-block">
+        <div class="countdown-icon">⏱</div>
+        <div>
+          <div class="countdown-label">Buyer inspection window</div>
+          <div class="countdown-timer" id="countdown">calculating…</div>
+        </div>
+      </div>`;
+    setTimeout(() => startCountdown(escrow.inspectionDeadline), 0);
+  } else {
+    stopCountdown();
+  }
+
+  // Dispute resolution panel (#7)
+  let disputeHtml = '';
+  if (escrow.status === 'disputed') {
+    disputeHtml = `
+      <div class="dispute-panel">
+        <div class="dispute-ai-header">
+          <div class="dispute-ai-icon">🤖</div>
+          <div>
+            <div class="dispute-ai-title">AI Dispute Resolution</div>
+            <div class="dispute-ai-sub">Analysing transaction evidence…</div>
+          </div>
+        </div>
+        <div id="disputeContent">
+          <div class="ai-thinking">
+            Reviewing&nbsp;
+            <span class="ai-dots"><span></span><span></span><span></span></span>
+          </div>
+        </div>
+      </div>`;
+    setTimeout(() => revealDisputeResolution(escrow), 3000);
+  }
 
   body.innerHTML = `
     <div class="escrow-amount-block">
       <div class="escrow-amount-label">Amount held in escrow</div>
       <div class="escrow-amount">${fmt(escrow.amount)}</div>
-      <div class="escrow-fee">Platform fee (3%): <span>${fmt(Math.round(escrow.amount * 0.03))}</span></div>
+      <div class="escrow-fee">Platform fee (3%): <span>${fmt(fee)}</span> · Seller receives: <span>${fmt(escrow.amount - fee)}</span></div>
     </div>
+    <div class="deal-link-row">
+      <span class="deal-link-icon">🔗</span>
+      <span class="deal-link-url" id="dealUrl">${dealUrl}</span>
+      <button class="deal-link-copy" onclick="copyDealLink('${dealUrl}')">Copy</button>
+    </div>
+    ${countdownHtml}
     <div class="escrow-meta">
-      <div class="escrow-meta-row">
-        <span class="label">Item</span>
-        <span class="value">${listing.title}</span>
-      </div>
-      <div class="escrow-meta-row">
-        <span class="label">Buyer</span>
-        <span class="value">Amara</span>
-      </div>
-      <div class="escrow-meta-row">
-        <span class="label">Seller</span>
-        <span class="value">Sipho</span>
-      </div>
-      <div class="escrow-meta-row">
-        <span class="label">Opened</span>
-        <span class="value">${new Date(escrow.createdAt).toLocaleTimeString('en-ZA')}</span>
-      </div>
-    </div>`;
+      <div class="escrow-meta-row"><span class="label">Item</span><span class="value">${listing.emoji || ''} ${listing.title || '—'}</span></div>
+      <div class="escrow-meta-row"><span class="label">Buyer</span><span class="value">Amara</span></div>
+      <div class="escrow-meta-row"><span class="label">Seller</span><span class="value">Sipho</span></div>
+      <div class="escrow-meta-row"><span class="label">Opened</span><span class="value">${new Date(escrow.createdAt).toLocaleTimeString('en-ZA')}</span></div>
+    </div>
+    ${disputeHtml}
+    ${escrow.status === 'confirmed' ? '<div class="terminal-msg confirmed">🎉 Transaction complete — funds released to seller!</div>' : ''}
+    ${escrow.status === 'cancelled' ? '<div class="terminal-msg cancelled">Transaction cancelled — buyer refunded in full.</div>' : ''}`;
 
-  // Timeline
+  // Timeline (#4 — animated via CSS slideIn)
   tlCard.style.display = 'block';
-  const iconMap = { buyer: '🛒', seller: '📦' };
+  const iconMap = { buyer: '🛒', seller: '📦', system: '🤖' };
   tlDiv.innerHTML = escrow.timeline.length
     ? escrow.timeline.map(t => `
         <div class="tl-item">
@@ -310,6 +471,98 @@ function renderEscrowPanel(escrow, listing) {
           </div>
         </div>`).join('')
     : '<div class="tl-empty">No activity yet</div>';
+}
+
+// ── Stepper (#1) ───────────────────────────────────────────────────────────
+function updateStepper(status) {
+  const stepMap = {
+    pending:   [1, 0, 0],
+    shipped:   [1, 1, 0],
+    confirmed: [1, 1, 1],
+    disputed:  [1, 1, 0],
+    cancelled: [1, 0, 0],
+  };
+  const [s1, s2, s3] = stepMap[status] || [0,0,0];
+  const isTerminal = status === 'confirmed';
+  const isError    = status === 'disputed' || status === 'cancelled';
+
+  setStep('step1',  'done');
+  setStep('step2',  s2 ? (isTerminal ? 'done' : isError ? 'error' : s2 === 1 && status === 'shipped' ? 'done' : 'done') : (status === 'pending' ? 'active' : ''));
+  setStep('step3',  s3 ? 'done' : (status === 'shipped' ? 'active' : ''));
+
+  // step 2 logic
+  if (status === 'pending')   { setStep('step2',''); setStep('step1','done'); }
+  if (status === 'shipped')   { setStep('step2','done'); setStep('step3','active'); }
+  if (status === 'confirmed') { setStep('step2','done'); setStep('step3','done'); }
+  if (status === 'disputed')  { setStep('step2','error'); setStep('step3',''); }
+  if (status === 'cancelled') { setStep('step2',''); setStep('step3',''); }
+
+  el('line1').className = 'step-line' + (s2 ? ' done' : '');
+  el('line2').className = 'step-line' + (s3 ? ' done' : '');
+}
+function setStep(id, cls) {
+  const s = el(id);
+  s.className = 'step' + (cls ? ' ' + cls : '');
+  const circle = s.querySelector('.step-circle');
+  if (cls === 'done')  circle.textContent = '✓';
+  else if (cls === 'error') circle.textContent = '!';
+  else circle.textContent = id.replace('step','');
+}
+
+// ── Countdown (#3) ─────────────────────────────────────────────────────────
+function startCountdown(deadline) {
+  stopCountdown();
+  countdownInterval = setInterval(() => {
+    const r = deadline - Date.now();
+    const cd = el('countdown');
+    if (!cd) { stopCountdown(); return; }
+    if (r <= 0) { cd.textContent = 'Window expired — auto-releasing'; stopCountdown(); return; }
+    const h = Math.floor(r / 3600000);
+    const m = Math.floor((r % 3600000) / 60000);
+    const s = Math.floor((r % 60000) / 1000);
+    cd.textContent = `${h}h ${m}m ${s}s remaining`;
+  }, 1000);
+}
+function stopCountdown() {
+  if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+}
+
+// ── Deal link copy (#6) ────────────────────────────────────────────────────
+function copyDealLink(url) {
+  navigator.clipboard?.writeText('https://' + url).catch(() => {});
+  showToast('Deal link copied! Share this with the buyer or seller.');
+}
+
+// ── Dispute resolution (#7) ────────────────────────────────────────────────
+function revealDisputeResolution(escrow) {
+  const content = document.getElementById('disputeContent');
+  if (!content) return;
+  content.innerHTML = `
+    <div class="dispute-recommendation">
+      <strong>AI Recommendation:</strong> Based on transaction history, shipping confirmation, and account trust scores, we recommend <strong>refunding the buyer</strong>. However, you may override this decision.
+    </div>
+    <div class="dispute-actions">
+      <button class="btn-resolve-buyer" onclick="resolveDispute('${escrow.id}','buyer')">↩ Refund Buyer</button>
+      <button class="btn-resolve-seller" onclick="resolveDispute('${escrow.id}','seller')">→ Pay Seller</button>
+    </div>`;
+}
+
+async function resolveDispute(escrowId, decision) {
+  await api('POST', `/escrow/${escrowId}/resolve`, { decision });
+  if (decision === 'seller') launchConfetti();
+  await fetchState();
+}
+
+// ── Confetti (#8) ──────────────────────────────────────────────────────────
+function launchConfetti() {
+  if (typeof confetti === 'undefined') return;
+  const end = Date.now() + 2000;
+  const colors = ['#FF2D55', '#00C48C', '#1E88E5', '#FFB300', '#9C27B0'];
+  (function frame() {
+    confetti({ particleCount: 6, angle: 60,  spread: 55, origin: { x: 0 }, colors });
+    confetti({ particleCount: 6, angle: 120, spread: 55, origin: { x: 1 }, colors });
+    if (Date.now() < end) requestAnimationFrame(frame);
+  })();
 }
 
 // ── DOM helpers ────────────────────────────────────────────────────────────
@@ -331,12 +584,15 @@ function mkLabel(text) {
   return d;
 }
 
-// ── Reset & boot ───────────────────────────────────────────────────────────
+// ── Reset ──────────────────────────────────────────────────────────────────
 el('btnReset').addEventListener('click', async () => {
+  selectedListingId = null;
+  stopCountdown();
   await api('POST', '/reset');
   await fetchState();
 });
 
+// ── Boot ───────────────────────────────────────────────────────────────────
 fetchState();
 </script>
 </body>
