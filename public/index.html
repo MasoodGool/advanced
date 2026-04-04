@@ -3,125 +3,134 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PayVault — Live Escrow Demo</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Archivo:wght@300;400;500;600&family=Archivo+Narrow:wght@400;500&display=swap" rel="stylesheet">
+  <title>PayVault — Escrow Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/stylesheets/style.css" />
 </head>
 <body>
 
-<div class="page">
+<!-- ── Navbar ──────────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <div class="nav-logo">
+    <div class="logo-icon">🔒</div>
+    PayVault
+  </div>
+  <div class="nav-links">
+    <button class="nav-link active">Escrow</button>
+    <button class="nav-link">Transactions</button>
+    <button class="nav-link">Payments</button>
+    <button class="nav-link">History</button>
+  </div>
+  <div class="nav-right">
+    <button class="btn-reset-nav" id="btnReset">↺ Reset Demo</button>
+    <button class="nav-bell">🔔</button>
+    <div class="nav-avatar">A</div>
+  </div>
+</nav>
 
-  <!-- ── MASTHEAD ──────────────────────────────────────────────────── -->
-  <div class="masthead">
-    <div>
-      <div class="brand-name">Pay<span>Vault</span></div>
-      <div class="brand-tagline">AI Escrow · Social Commerce · South Africa</div>
+<!-- ── 3-column layout ─────────────────────────────────────────────────────── -->
+<main class="layout">
+
+  <!-- LEFT: Buyer (Amara) -->
+  <div>
+    <div class="card">
+      <div class="card-body">
+        <div class="wallet-card buyer-card">
+          <div class="wallet-role">Buyer</div>
+          <div class="wallet-name">Amara</div>
+          <div class="wallet-balance-label">Available balance</div>
+          <div class="wallet-balance" id="buyerBalance">R 12,000</div>
+        </div>
+      </div>
     </div>
-    <div class="masthead-right">
-      <div class="issue-label">Interactive Demo</div>
-      <div class="issue-val">Facebook Marketplace Flow</div>
-      <div><span class="badge-demo">Live Prototype</span></div>
-      <button class="btn-reset" id="btnReset">↺ Reset Demo</button>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="card-title">Marketplace Listing</span>
+        </div>
+
+        <div class="listing">
+          <div class="listing-img">🎮</div>
+          <div class="listing-info">
+            <div class="listing-title" id="listingTitle">Sony PlayStation 5</div>
+            <div class="listing-desc">Excellent condition, barely used. 2 controllers &amp; 3 games. Selling due to upgrade.</div>
+            <div class="listing-bottom">
+              <span class="listing-price" id="listingPrice">R 8,500</span>
+              <span class="listing-status-tag available" id="listingStatusTag">Available</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="buyerActions"></div>
+      </div>
     </div>
   </div>
 
-  <!-- ── HEADLINE STRIP ─────────────────────────────────────────────── -->
-  <div class="headline-strip">
-    <div class="hs-kicker">How PayVault Works — Step Through the Transaction Below</div>
-    <div class="hs-headline">
-      Buyer pays into protected escrow. Seller ships. Buyer confirms receipt.
-      <em>Funds released instantly.</em> No bank transfer to strangers. No risk.
-    </div>
-  </div>
+  <!-- CENTRE: Escrow Status -->
+  <div>
+    <div class="card">
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="card-title">Escrow Status</span>
+          <span id="statusBadge" class="status-badge status-none">No escrow</span>
+        </div>
 
-  <!-- ── THREE-COLUMN DEMO ──────────────────────────────────────────── -->
-  <div class="demo-grid">
-
-    <!-- LEFT: Buyer (Amara) -->
-    <div class="demo-col">
-      <div class="col-head">
-        Amara
-        <span class="col-head-role buyer">Buyer</span>
-      </div>
-
-      <div class="balance-block">
-        <div class="balance-label">PayVault Wallet</div>
-        <div class="balance-amount" id="buyerBalance">R 12,000</div>
-      </div>
-
-      <!-- Listing -->
-      <div class="listing" id="listingCard">
-        <div class="listing-img">🎮</div>
-        <div class="listing-info">
-          <div class="listing-title" id="listingTitle">Sony PlayStation 5</div>
-          <div class="listing-desc" id="listingDesc">Excellent condition, barely used. 2 controllers &amp; 3 games. Selling due to upgrade.</div>
-          <div>
-            <span class="listing-price" id="listingPrice">R 8,500</span>
-            <span class="listing-status-tag available" id="listingStatusTag">Available</span>
+        <div id="escrowBody">
+          <div class="no-escrow">
+            <div class="icon">🔐</div>
+            <p>No active escrow.<br>Amara can start a protected purchase from the left panel.</p>
           </div>
         </div>
       </div>
-
-      <div id="buyerActions"></div>
     </div>
 
-    <div class="col-divider"></div>
+    <div class="card" id="timelineCard" style="display:none">
+      <div class="card-body">
+        <div class="timeline-head">Activity</div>
+        <div id="timeline"></div>
+      </div>
+    </div>
+  </div>
 
-    <!-- CENTRE: Escrow -->
-    <div class="demo-col">
-      <div class="col-head">PayVault Escrow</div>
-      <div id="escrowBody">
-        <div class="no-escrow">
-          <div class="icon">🔐</div>
-          <p>No active escrow.<br>Amara can initiate a protected purchase below.</p>
+  <!-- RIGHT: Seller (Sipho) -->
+  <div>
+    <div class="card">
+      <div class="card-body">
+        <div class="wallet-card seller-card">
+          <div class="wallet-role">Seller</div>
+          <div class="wallet-name">Sipho</div>
+          <div class="wallet-balance-label">Available balance</div>
+          <div class="wallet-balance" id="sellerBalance">R 3,500</div>
         </div>
       </div>
     </div>
 
-    <div class="col-divider"></div>
-
-    <!-- RIGHT: Seller (Sipho) -->
-    <div class="demo-col">
-      <div class="col-head">
-        Sipho
-        <span class="col-head-role seller">Seller</span>
+    <div class="card">
+      <div class="card-body">
+        <div class="card-header-row">
+          <span class="card-title">Seller Actions</span>
+        </div>
+        <div id="sellerActions">
+          <div class="waiting-msg">Waiting for a buyer to initiate an escrow deal…</div>
+        </div>
       </div>
-
-      <div class="balance-block">
-        <div class="balance-label">PayVault Wallet</div>
-        <div class="balance-amount" id="sellerBalance">R 3,500</div>
-      </div>
-
-      <div id="sellerActions">
-        <div class="waiting-msg">Waiting for a buyer to initiate an escrow deal…</div>
-      </div>
-    </div>
-
-  </div><!-- /demo-grid -->
-
-  <!-- ── FOOTER ─────────────────────────────────────────────────────── -->
-  <div class="footer-rule"></div>
-  <div class="footer">
-    <div class="footer-left">
-      PayVault (Pty) Ltd · South Africa<br>
-      Incorporating 2026 · FSCA Licence in Progress
-    </div>
-    <div class="footer-center">PAY<span style="color:var(--teal)">VAULT</span></div>
-    <div class="footer-right">
-      invest@payvault.co.za<br>
-      Pre-Seed Round Now Open · R800K–R1.5M
     </div>
   </div>
 
-</div><!-- /page -->
+</main>
 
-<!-- Error toast -->
 <div class="toast" id="toast"></div>
 
 <script>
 // ── Helpers ────────────────────────────────────────────────────────────────
 const el  = id => document.getElementById(id);
 const fmt = n  => 'R\u00A0' + Number(n).toLocaleString('en-ZA');
+
+const tl_icons = {
+  buyer:  '🛒',
+  seller: '📦',
+};
 
 function showToast(msg) {
   const t = el('toast');
@@ -140,83 +149,66 @@ async function api(method, path, body) {
 }
 
 // ── State ──────────────────────────────────────────────────────────────────
-let state = { users: {}, listings: {}, escrows: {} };
-
 async function fetchState() {
-  state = await api('GET', '/state');
-  render();
+  const state = await api('GET', '/state');
+  render(state);
 }
 
 // ── Render ─────────────────────────────────────────────────────────────────
-function render() {
+function render(state) {
   const buyer   = state.users.buyer;
   const seller  = state.users.seller;
   const listing = Object.values(state.listings)[0];
   const escrow  = Object.values(state.escrows)[0] || null;
 
-  // Balances
   el('buyerBalance').textContent  = fmt(buyer.balance);
   el('sellerBalance').textContent = fmt(seller.balance);
+  el('listingPrice').textContent  = fmt(listing.price);
 
-  // Listing tag
-  const tagEl = el('listingStatusTag');
   const tagLabels = { available: 'Available', in_escrow: 'In Escrow', sold: 'Sold' };
+  const tagEl = el('listingStatusTag');
   tagEl.textContent = tagLabels[listing.status] || listing.status;
   tagEl.className = 'listing-status-tag ' + listing.status;
-  el('listingPrice').textContent = fmt(listing.price);
 
   renderBuyerActions(escrow, listing);
   renderSellerActions(escrow);
   renderEscrowPanel(escrow, listing);
 }
 
-// ── Buyer actions ──────────────────────────────────────────────────────────
+// ── Buyer ──────────────────────────────────────────────────────────────────
 function renderBuyerActions(escrow, listing) {
   const div = el('buyerActions');
   div.innerHTML = '';
 
   if (!escrow && listing.status === 'available') {
-    div.appendChild(label('Purchase via PayVault Escrow'));
-    div.appendChild(btn(
-      `Buy Now — ${fmt(listing.price)}`, 'btn-primary',
-      async () => {
-        await api('POST', '/escrow', { listingId: listing.id, buyerId: 'buyer' });
-        await fetchState();
-      }
-    ));
+    div.appendChild(mkBtn(`Buy Now — ${fmt(listing.price)}`, 'btn-primary', async () => {
+      await api('POST', '/escrow', { listingId: listing.id, buyerId: 'buyer' });
+      await fetchState();
+    }));
   }
 
-  if (escrow && escrow.status === 'pending') {
-    div.appendChild(label('Funds locked in escrow'));
-    div.appendChild(btn(
-      'Cancel Purchase — Full Refund', 'btn-secondary',
-      async () => {
-        await api('POST', `/escrow/${escrow.id}/cancel`, { userId: 'buyer' });
-        await fetchState();
-      }
-    ));
+  if (escrow?.status === 'pending') {
+    div.appendChild(mkLabel('Funds locked in escrow'));
+    div.appendChild(mkBtn('Cancel — Get Refund', 'btn-secondary', async () => {
+      await api('POST', `/escrow/${escrow.id}/cancel`, { userId: 'buyer' });
+      await fetchState();
+    }));
   }
 
-  if (escrow && escrow.status === 'shipped') {
-    div.appendChild(label('Item marked as shipped'));
-    div.appendChild(btn(
-      '✓ Confirm Receipt — Release Funds', 'btn-success',
-      async () => {
-        await api('POST', `/escrow/${escrow.id}/confirm`, { userId: 'buyer' });
-        await fetchState();
-      }
-    ));
-    div.appendChild(btn(
-      'Raise Dispute', 'btn-danger',
-      async () => {
-        await api('POST', `/escrow/${escrow.id}/dispute`, { userId: 'buyer', reason: 'Item not as described' });
-        await fetchState();
-      }
-    ));
+  if (escrow?.status === 'shipped') {
+    div.appendChild(mkLabel('Item has been shipped'));
+    div.appendChild(mkBtn('✓ Confirm Receipt', 'btn-success', async () => {
+      await api('POST', `/escrow/${escrow.id}/confirm`, { userId: 'buyer' });
+      await fetchState();
+    }));
+    div.appendChild(mkBtn('Raise Dispute', 'btn-danger', async () => {
+      await api('POST', `/escrow/${escrow.id}/dispute`, { userId: 'buyer', reason: 'Item not as described' });
+      await fetchState();
+    }));
   }
 }
 
-// ── Seller actions ─────────────────────────────────────────────────────────
+// ── Seller ─────────────────────────────────────────────────────────────────
 function renderSellerActions(escrow) {
   const div = el('sellerActions');
   div.innerHTML = '';
@@ -225,110 +217,103 @@ function renderSellerActions(escrow) {
     div.innerHTML = '<div class="waiting-msg">Waiting for a buyer to initiate an escrow deal…</div>';
     return;
   }
-
   if (escrow.status === 'pending') {
-    div.appendChild(label('New order received — funds secured'));
-    div.appendChild(btn(
-      '📦 Mark as Shipped', 'btn-primary',
-      async () => {
-        await api('POST', `/escrow/${escrow.id}/ship`, { userId: 'seller' });
-        await fetchState();
-      }
-    ));
-    div.appendChild(btn(
-      'Raise Dispute', 'btn-danger',
-      async () => {
-        await api('POST', `/escrow/${escrow.id}/dispute`, { userId: 'seller', reason: 'Cannot fulfil order' });
-        await fetchState();
-      }
-    ));
+    div.appendChild(mkLabel('New order — funds secured'));
+    div.appendChild(mkBtn('📦 Mark as Shipped', 'btn-primary', async () => {
+      await api('POST', `/escrow/${escrow.id}/ship`, { userId: 'seller' });
+      await fetchState();
+    }));
+    div.appendChild(mkBtn('Raise Dispute', 'btn-danger', async () => {
+      await api('POST', `/escrow/${escrow.id}/dispute`, { userId: 'seller', reason: 'Cannot fulfil order' });
+      await fetchState();
+    }));
+    return;
   }
-
   if (escrow.status === 'shipped') {
-    div.innerHTML = '<div class="waiting-msg">Awaiting buyer confirmation of receipt. Funds will release automatically on approval.</div>';
-    div.appendChild(btn(
-      'Raise Dispute', 'btn-danger',
-      async () => {
-        await api('POST', `/escrow/${escrow.id}/dispute`, { userId: 'seller', reason: 'Buyer unresponsive' });
-        await fetchState();
-      }
-    ));
+    div.innerHTML = '<div class="waiting-msg">Awaiting buyer confirmation. Funds will release automatically on approval.</div>';
+    div.appendChild(mkBtn('Raise Dispute', 'btn-danger', async () => {
+      await api('POST', `/escrow/${escrow.id}/dispute`, { userId: 'seller', reason: 'Buyer unresponsive' });
+      await fetchState();
+    }));
+    return;
   }
-
-  const terminals = {
-    confirmed: `<div class="terminal-msg confirmed">Payment of ${escrow ? fmt(escrow.amount) : ''} has been released to your PayVault wallet.</div>`,
-    disputed:  '<div class="terminal-msg disputed">Dispute filed. Our AI resolution engine is reviewing the evidence. Human review within 2 hours if unresolved.</div>',
-    cancelled: '<div class="terminal-msg cancelled">Transaction cancelled. The listing is available again.</div>',
+  const msgs = {
+    confirmed: `<div class="terminal-msg confirmed">🎉 ${escrow ? fmt(escrow.amount) : ''} released to your wallet!</div>`,
+    disputed:  '<div class="terminal-msg disputed">⚠ Dispute filed. AI review in progress — resolution within 2 hours.</div>',
+    cancelled: '<div class="terminal-msg cancelled">Transaction cancelled. Listing is available again.</div>',
   };
-  if (escrow && terminals[escrow.status]) div.innerHTML = terminals[escrow.status];
+  if (msgs[escrow.status]) div.innerHTML = msgs[escrow.status];
 }
 
-// ── Escrow centre panel ────────────────────────────────────────────────────
+// ── Escrow centre ──────────────────────────────────────────────────────────
 function renderEscrowPanel(escrow, listing) {
-  const body = el('escrowBody');
+  const body      = el('escrowBody');
+  const badge     = el('statusBadge');
+  const tlCard    = el('timelineCard');
+  const tlDiv     = el('timeline');
+
+  const statusLabels = {
+    pending: 'Pending', shipped: 'Shipped', confirmed: 'Confirmed',
+    disputed: 'Disputed', cancelled: 'Cancelled',
+  };
 
   if (!escrow) {
+    badge.className = 'status-badge status-none';
+    badge.textContent = 'No escrow';
     body.innerHTML = `
       <div class="no-escrow">
         <div class="icon">🔐</div>
-        <p>No active escrow.<br>Amara can initiate a protected purchase below.</p>
+        <p>No active escrow.<br>Amara can start a protected purchase from the left panel.</p>
       </div>`;
+    tlCard.style.display = 'none';
     return;
   }
 
-  const statusLabels = {
-    pending:   'Pending',
-    shipped:   'Shipped',
-    confirmed: 'Confirmed',
-    disputed:  'Disputed',
-    cancelled: 'Cancelled',
-  };
-
-  const timeline = escrow.timeline.map(t => `
-    <div class="tl-item">
-      <div class="tl-dot"></div>
-      <div>
-        <div class="tl-text">${t.event}</div>
-        <div class="tl-time">${new Date(t.ts).toLocaleTimeString('en-ZA')}</div>
-      </div>
-    </div>`).join('');
+  badge.className = `status-badge status-${escrow.status}`;
+  badge.textContent = statusLabels[escrow.status] || escrow.status;
 
   body.innerHTML = `
-    <div style="text-align:center;margin-bottom:1rem">
-      <span class="status-badge status-${escrow.status}">${statusLabels[escrow.status] || escrow.status}</span>
+    <div class="escrow-amount-block">
+      <div class="escrow-amount-label">Amount held in escrow</div>
+      <div class="escrow-amount">${fmt(escrow.amount)}</div>
+      <div class="escrow-fee">Platform fee (3%): <span>${fmt(Math.round(escrow.amount * 0.03))}</span></div>
     </div>
-    <div class="amount-highlight">${fmt(escrow.amount)}</div>
-    <div class="amount-sub">Held in protected escrow</div>
     <div class="escrow-meta">
       <div class="escrow-meta-row">
-        <span>Item</span>
-        <strong>${listing.title}</strong>
+        <span class="label">Item</span>
+        <span class="value">${listing.title}</span>
       </div>
       <div class="escrow-meta-row">
-        <span>Buyer</span>
-        <strong>Amara</strong>
+        <span class="label">Buyer</span>
+        <span class="value">Amara</span>
       </div>
       <div class="escrow-meta-row">
-        <span>Seller</span>
-        <strong>Sipho</strong>
+        <span class="label">Seller</span>
+        <span class="value">Sipho</span>
       </div>
       <div class="escrow-meta-row">
-        <span>Platform fee (3%)</span>
-        <strong style="color:var(--gold)">${fmt(Math.round(escrow.amount * 0.03))}</strong>
+        <span class="label">Opened</span>
+        <span class="value">${new Date(escrow.createdAt).toLocaleTimeString('en-ZA')}</span>
       </div>
-      <div class="escrow-meta-row">
-        <span>Opened</span>
-        <strong>${new Date(escrow.createdAt).toLocaleTimeString('en-ZA')}</strong>
-      </div>
-    </div>
-    <div class="timeline">
-      <div class="timeline-head">Activity Log</div>
-      ${timeline || '<div class="tl-empty">No events yet</div>'}
     </div>`;
+
+  // Timeline
+  tlCard.style.display = 'block';
+  const iconMap = { buyer: '🛒', seller: '📦' };
+  tlDiv.innerHTML = escrow.timeline.length
+    ? escrow.timeline.map(t => `
+        <div class="tl-item">
+          <div class="tl-icon">${iconMap[t.actor] || '⚡'}</div>
+          <div>
+            <div class="tl-text">${t.event}</div>
+            <div class="tl-time">${new Date(t.ts).toLocaleTimeString('en-ZA')}</div>
+          </div>
+        </div>`).join('')
+    : '<div class="tl-empty">No activity yet</div>';
 }
 
 // ── DOM helpers ────────────────────────────────────────────────────────────
-function btn(text, cls, onClick) {
+function mkBtn(text, cls, onClick) {
   const b = document.createElement('button');
   b.className = 'btn ' + cls;
   b.textContent = text;
@@ -339,21 +324,19 @@ function btn(text, cls, onClick) {
   });
   return b;
 }
-
-function label(text) {
+function mkLabel(text) {
   const d = document.createElement('div');
   d.className = 'actions-label';
   d.textContent = text;
   return d;
 }
 
-// ── Reset ──────────────────────────────────────────────────────────────────
+// ── Reset & boot ───────────────────────────────────────────────────────────
 el('btnReset').addEventListener('click', async () => {
   await api('POST', '/reset');
   await fetchState();
 });
 
-// ── Boot ───────────────────────────────────────────────────────────────────
 fetchState();
 </script>
 </body>
